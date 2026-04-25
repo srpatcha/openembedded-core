@@ -219,7 +219,7 @@ def spawn_preferred(sh_cmd, title=None, env=None, d=None):
             break
         except UnsupportedTerminal:
             pass
-        except:
+        except Exception:
             bb.warn("Terminal %s is supported but did not start" % (terminal.name))
     # when we've run out of options
     else:
@@ -332,6 +332,6 @@ def distro_name():
         p = Popen(['lsb_release', '-i'])
         out, err = p.communicate()
         distro = out.split(':')[1].strip().lower()
-    except:
+    except Exception:
         distro = "unknown"
     return distro

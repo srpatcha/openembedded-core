@@ -8,7 +8,7 @@ SPDX_VERSION ??= ""
 DEPLOY_DIR_SPDX ??= "${DEPLOY_DIR}/spdx/${SPDX_VERSION}"
 
 # The product name that the CVE database uses.  Defaults to BPN, but may need to
-# be overriden per recipe (for example tiff.bb sets CVE_PRODUCT=libtiff).
+# be overridden per recipe (for example tiff.bb sets CVE_PRODUCT=libtiff).
 CVE_PRODUCT ??= "${BPN}"
 CVE_VERSION ??= "${PV}"
 

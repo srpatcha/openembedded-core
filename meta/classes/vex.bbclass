@@ -22,7 +22,7 @@
 #   bitbake -k -c generate_vex universe
 #
 # The product name that the CVE database uses defaults to BPN, but may need to
-# be overriden per recipe (for example tiff.bb sets CVE_PRODUCT=libtiff).
+# be overridden per recipe (for example tiff.bb sets CVE_PRODUCT=libtiff).
 CVE_PRODUCT ??= "${BPN}"
 CVE_VERSION ??= "${PV}"
 
