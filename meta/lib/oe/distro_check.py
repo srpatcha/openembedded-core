@@ -30,7 +30,7 @@ def find_latest_numeric_release(url, d):
         try:
             # TODO use bb.utils.vercmp_string_op()
             release = float(link)
-        except:
+        except Exception:
             release = 0
         if release > max:
             max = release
@@ -103,7 +103,7 @@ def find_latest_debian_release(url, d):
     releases.sort()
     try:
         return releases[-1]
-    except:
+    except Exception:
         return "_NotFound_"
 
 def get_debian_style_source_package_list(url, section, d):
@@ -195,10 +195,11 @@ def update_distro_data(distro_check_dir, datetime, d):
     datetime_file = os.path.join(distro_check_dir, "build_datetime")
     saved_datetime = "_invalid_"
     import fcntl
-    try:
-        if not os.path.exists(datetime_file):
-            open(datetime_file, 'w+').close() # touch the file so that the next open won't fail
+    if not os.path.exists(datetime_file):
+        open(datetime_file, 'w+').close() # touch the file so that the next open won't fail
 
+    f = None
+    try:
         f = open(datetime_file, "r+")
         fcntl.lockf(f, fcntl.LOCK_EX)
         saved_datetime = f.read()
@@ -212,8 +213,9 @@ def update_distro_data(distro_check_dir, datetime, d):
     except OSError as e:
         raise Exception('Unable to open timestamp: %s' % e)
     finally:
-        fcntl.lockf(f, fcntl.LOCK_UN)
-        f.close()
+        if f is not None:
+            fcntl.lockf(f, fcntl.LOCK_UN)
+            f.close()
 
 def compare_in_distro_packages_list(distro_check_dir, d):
     if not os.path.isdir(distro_check_dir):
@@ -261,18 +263,16 @@ def compare_in_distro_packages_list(distro_check_dir, d):
 
     for file in os.listdir(pkglst_dir):
         (distro, distro_release) = file.split("-")
-        f = open(os.path.join(pkglst_dir, file), "r")
-        for line in f:
-            (pkg, section) = line.split(":")
-            if distro.lower() in distro_pn_aliases:
-                pn = distro_pn_aliases[distro.lower()]
-            else:
-                pn = recipe_name
-            if pn == pkg:
-                matching_distros.append(distro + "-" + section[:-1]) # strip the \n at the end
-                f.close()
-                break
-        f.close()
+        with open(os.path.join(pkglst_dir, file), "r") as f:
+            for line in f:
+                (pkg, section) = line.split(":")
+                if distro.lower() in distro_pn_aliases:
+                    pn = distro_pn_aliases[distro.lower()]
+                else:
+                    pn = recipe_name
+                if pn == pkg:
+                    matching_distros.append(distro + "-" + section[:-1]) # strip the \n at the end
+                    break
 
     for item in tmp.split():
         matching_distros.append(item)
@@ -305,10 +305,9 @@ def save_distro_check_result(result, datetime, result_file, d):
     line = pn
     for i in result:
         line = line + "," + i
-    f = open(result_file, "a")
     import fcntl
-    fcntl.lockf(f, fcntl.LOCK_EX)
-    f.seek(0, os.SEEK_END) # seek to the end of file
-    f.write(line + "\n")
-    fcntl.lockf(f, fcntl.LOCK_UN)
-    f.close()
+    with open(result_file, "a") as f:
+        fcntl.lockf(f, fcntl.LOCK_EX)
+        f.seek(0, os.SEEK_END) # seek to the end of file
+        f.write(line + "\n")
+        fcntl.lockf(f, fcntl.LOCK_UN)
