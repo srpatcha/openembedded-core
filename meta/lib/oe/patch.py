@@ -658,7 +658,7 @@ class GitApplyTree(PatchTree):
                     output = PatchTree._applypatch(self, patch, force, reverse, run)
                 output += self._commitpatch(patch, patchfilevar)
                 return output
-        except:
+        except (bb.process.ExecutionError, CmdError, IOError, OSError):
             patch_applied = False
             raise
         finally:
